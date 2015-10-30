@@ -4,10 +4,40 @@ body{
 
 #container{
     width: 100%;
+    text-align: center;
 }
 
 #canvas{
-    display: block;
+    display: inline-block;
     margin: 0 auto;
     border: 1px solid blue;
+}
+
+#panel{
+    display: inline-block;
+    border: 1px solid red;
+    height: 550px;
+    width: 300px;
+    background: darkgray;
+}
+
+#t1{
+    margin-left: 20px;
+    margin-top: 30px;
+}
+
+#t1col1{
+    font-family: calibri;
+    font-size: 14;
+    font-weight: bold;
+    color: blue;
+    width: 100px;
+    text-align: left;
+}
+
+#distance{
+    font-family: serif;
+    font-weight: bold;
+    font-size: 22px;
+    color: rgb(255, 0, 107);
 }

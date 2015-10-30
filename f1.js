@@ -27,8 +27,9 @@ var rl = {
     m: function(){ return this.lines(6, 6);},
     length: 100,
     gap: 10,
-    speed: 2,
+    speed: 0,
     vialence: 2,
+    distance: 0,
     lines: function(l, g){return this.a + l * this.length + g * this.gap;}
 };
 
@@ -37,12 +38,40 @@ var car = {
     x2: 80,
     y1: 400,
     y2: 100,
-    move: 10,
+    move: 27,
     draw: function(){
-        c.rect(car.x1, car.y1, car.x2, car.y2);
-        c.stroke();
+        if(this.y1 < can.height){
+            c.rect(this.x1, this.y1, this.x2, this.y2);
+            c.stroke();
+        }
     }
-}
+};
+
+var wall = {
+    x1: 51,
+    y1: -40,
+    h: 40,
+    l: 100,
+    draw: function(){
+        c.fillStyle = "rgb(0, 0, 200)";
+        c.fillRect(this.x1, this.y1, this.l, this.h);
+    }
+};
+
+var pos = function(){
+    var num = Math.floor((Math.random() * 3) + 1);
+    if(num === 1){
+        wall.x1 = 51;
+    }
+    else if(num === 2){
+        wall.x1 = 150;
+    }
+    else{
+        wall.x1 = 249;
+    }
+};
+
+var dist = document.getElementById("distance");
 
 var repeatme = function (flag) {
     
@@ -85,19 +114,34 @@ var repeatme = function (flag) {
     
     c.stroke();
     
-    if((rl.gap - rl.a) > rl.speed){rl.a += rl.speed}
-    else{rl.a += rl.speed - rl.gap - rl.length}
+    if((rl.gap - rl.a) > rl.speed){
+        rl.a += rl.speed;
+    }
+    else{
+        rl.a += rl.speed - rl.gap - rl.length;
+        rl.distance += 10;
+    }
     
     car.draw();
     
+    if(rl.distance >= 100 && rl.distance % 100 === 0){
+        wall.y1 = -41;
+        pos();
+    }
+    if(wall.y1 < can.height){
+        wall.draw();
+        wall.y1 += rl.speed;
+    }
+    //console.log("d: " + rl.distance + " m: " + wall.move + " y1: " + wall.y1);
+    if(rl.distance % 100 === 0)
+        dist.innerHTML = rl.distance / 1000 + " km";
     window.requestAnimationFrame(repeatme);
 };
 
-// repeatme(0);
+while(wall.distance ){
+    
+}
 
-//c.beginPath();
-//c.rect(car.x1, car.y1, car.x2, car.y2);
-//c.stroke();
 
 // Add an event listener to the keypress event.
 window.addEventListener("keydown", function(event) { 
@@ -108,12 +152,27 @@ window.addEventListener("keydown", function(event) {
     }
     else if(event.keyCode === 40){rl.speed -= rl.vialence}
     if(event.keyCode === 39){
-        car.x1 += car.move;
+        if((car.x1 + car.x2) < rl.x2){
+            if((car.x1 + car.x2) >= (rl.x2 - car.move)){
+                car.x1 = rl.x2 - car.x2 - 1;
+            }
+            else{
+                car.x1 += car.move;
+            }
+            //console.log((car.x1 + car.x2) + " " + rl.x2);
+        }
     }
     else if(event.keyCode === 37){
-        car.x1 -= car.move;
+        if(car.x1 > rl.x1){
+            if(car.x1 < (rl.x1 + car.move)){
+                car.x1 = rl.x1 + 1;
+            }
+            else{
+                car.x1 -= car.move;
+            }
+        }
     }
-    
 });
 
 repeatme();
+
