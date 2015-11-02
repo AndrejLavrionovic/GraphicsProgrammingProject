@@ -33,6 +33,7 @@ var rl = {
     lines: function(l, g){return this.a + l * this.length + g * this.gap;}
 };
 
+// this object draws the car on the canvas road
 var car = {
     x1: 160,
     x2: 80,
@@ -47,6 +48,8 @@ var car = {
     }
 };
 
+// this object builds the wall on the canvas
+// road.
 var wall = {
     x1: 51,
     y1: -40,
@@ -58,6 +61,8 @@ var wall = {
     }
 };
 
+// this function places the wall randomly on the
+// canvas road.
 var pos = function(){
     var num = Math.floor((Math.random() * 3) + 1);
     if(num === 1){
@@ -124,6 +129,7 @@ var repeatme = function (flag) {
     
     car.draw();
     
+    // generate the wall
     if(rl.distance >= 100 && rl.distance % 100 === 0){
         wall.y1 = -41;
         pos();
@@ -132,15 +138,20 @@ var repeatme = function (flag) {
         wall.draw();
         wall.y1 += rl.speed;
     }
+    
+    // collision with wall
+    if(((wall.y1 + wall.h) >= car.y1) && (wall.y1 <= (car.y1 + car.y2))){
+        if(car.x1 > (wall.x1 - car.x2) && car.x1 < (wall.x1 + wall.l)){
+            rl.speed = 0;
+        }
+    }
+    
+    
     //console.log("d: " + rl.distance + " m: " + wall.move + " y1: " + wall.y1);
     if(rl.distance % 100 === 0)
         dist.innerHTML = rl.distance / 1000 + " km";
     window.requestAnimationFrame(repeatme);
 };
-
-while(wall.distance ){
-    
-}
 
 
 // Add an event listener to the keypress event.
