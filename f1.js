@@ -30,7 +30,7 @@ var rl = {
     length: 100,
     gap: 10,
     speed: 0,
-    vialence: 2,
+    vialence: 0.1,
     distance: 0,
     lines: function(l, g){return this.a + l * this.length + g * this.gap;}
 };
@@ -41,11 +41,12 @@ var car = {
     l: 80,
     y1: 400,
     h: 100,
-    move: 27,
+    move: 2,
     draw: function(){
         img.src = "img/sau.gif";
         c.drawImage(img, this.x1, this.y1);
-    }
+    },
+    keys: []
 };
 
 // this object builds the wall on the canvas
@@ -147,23 +148,8 @@ var repeatme = function(){
         }
     }
     
-    
-    //console.log("d: " + rl.distance + " m: " + wall.move + " y1: " + wall.y1);
-    if(rl.distance % 100 === 0)
-        dist.innerHTML = rl.distance / 1000 + " km";
-    window.requestAnimationFrame(repeatme);
-};
-
-
-// Add an event listener to the keypress event.
-window.addEventListener("keydown", function(event) { 
-    // Just log the event to the console.
-    console.log(event);
-    if(event.keyCode === 38){
-        rl.speed += rl.vialence;
-    }
-    else if(event.keyCode === 40){rl.speed -= rl.vialence}
-    if(event.keyCode === 39){
+    // character movement in canvas game using keyboard controls
+    if(car.keys[39]){
         if((car.x1 + car.l) < rl.x2){
             if((car.x1 + car.l) >= (rl.x2 - car.move)){
                 car.x1 = rl.x2 - car.l - 1;
@@ -171,10 +157,9 @@ window.addEventListener("keydown", function(event) {
             else{
                 car.x1 += car.move;
             }
-            //console.log((car.x1 + car.x2) + " " + rl.x2);
         }
     }
-    else if(event.keyCode === 37){
+    else if(car.keys[37]){
         if(car.x1 > rl.x1){
             if(car.x1 < (rl.x1 + car.move)){
                 car.x1 = rl.x1 + 1;
@@ -184,6 +169,27 @@ window.addEventListener("keydown", function(event) {
             }
         }
     }
+    else if(car.keys[38]){
+        rl.speed += rl.vialence;
+    }
+    else if(car.keys[40]){
+        rl.speed = 0;
+    }
+    
+    
+    //console.log("d: " + rl.distance + " m: " + wall.move + " y1: " + wall.y1);
+    if(rl.distance % 100 === 0)
+        dist.innerHTML = rl.distance / 1000 + " km";
+    window.requestAnimationFrame(repeatme);
+};
+
+
+// Add an event listener to the keypress event.
+window.addEventListener("keydown", function(event) {
+    car.keys[event.keyCode] = true;
+});
+window.addEventListener("keyup", function(event) {
+    car.keys[event.keyCode] = false;
 });
 
 repeatme();
