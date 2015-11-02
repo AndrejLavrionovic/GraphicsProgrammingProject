@@ -8,6 +8,8 @@ var c = can.getContext("2d");
 can.width = 400;
 can.height = 550;
 
+var img = new Image();
+
 // Road object
 var rl = {
     x1: 50,
@@ -36,15 +38,13 @@ var rl = {
 // this object draws the car on the canvas road
 var car = {
     x1: 160,
-    x2: 80,
+    l: 80,
     y1: 400,
-    y2: 100,
+    h: 100,
     move: 27,
     draw: function(){
-        if(this.y1 < can.height){
-            c.rect(this.x1, this.y1, this.x2, this.y2);
-            c.stroke();
-        }
+        img.src = "img/sau.gif";
+        c.drawImage(img, this.x1, this.y1);
     }
 };
 
@@ -78,7 +78,7 @@ var pos = function(){
 
 var dist = document.getElementById("distance");
 
-var repeatme = function (flag) {
+var repeatme = function(){
     
     c.clearRect(0, 0, can.width, can.height);
     
@@ -127,6 +127,7 @@ var repeatme = function (flag) {
         rl.distance += 10;
     }
     
+    //car.draw();
     car.draw();
     
     // generate the wall
@@ -140,8 +141,8 @@ var repeatme = function (flag) {
     }
     
     // collision with wall
-    if(((wall.y1 + wall.h) >= car.y1) && (wall.y1 <= (car.y1 + car.y2))){
-        if(car.x1 > (wall.x1 - car.x2) && car.x1 < (wall.x1 + wall.l)){
+    if(((wall.y1 + wall.h) >= car.y1) && (wall.y1 <= (car.y1 + car.h))){
+        if(car.x1 > (wall.x1 - car.l) && car.x1 < (wall.x1 + wall.l)){
             rl.speed = 0;
         }
     }
@@ -163,9 +164,9 @@ window.addEventListener("keydown", function(event) {
     }
     else if(event.keyCode === 40){rl.speed -= rl.vialence}
     if(event.keyCode === 39){
-        if((car.x1 + car.x2) < rl.x2){
-            if((car.x1 + car.x2) >= (rl.x2 - car.move)){
-                car.x1 = rl.x2 - car.x2 - 1;
+        if((car.x1 + car.l) < rl.x2){
+            if((car.x1 + car.l) >= (rl.x2 - car.move)){
+                car.x1 = rl.x2 - car.l - 1;
             }
             else{
                 car.x1 += car.move;
