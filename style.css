@@ -28,16 +28,17 @@ body{
 
 #t1col1{
     font-family: calibri;
-    font-size: 14;
+    font-size: 12;
     font-weight: bold;
     color: blue;
-    width: 100px;
+    width: 150px;
     text-align: left;
 }
 
-#distance{
+.t1col2{
+    text-align: left;
     font-family: serif;
     font-weight: bold;
-    font-size: 22px;
-    color: rgb(255, 0, 107);
+    font-size: 18px;
+    color: rgb(220, 220, 220);
 }

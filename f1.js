@@ -8,7 +8,15 @@ var c = can.getContext("2d");
 can.width = 400;
 can.height = 550;
 
+var dist = document.getElementById("distance");
+var points = document.getElementById("points");
+var level = document.getElementById("level");
+var lives = document.getElementById("lives");
+var walls = document.getElementById("walls");
+
 var img = new Image();
+var wallImg = new Image();
+var funnel = new Image();
 
 // Road object
 var rl = {
@@ -30,10 +38,24 @@ var rl = {
     length: 100,
     gap: 10,
     speed: 0,
-    vialence: 0.1,
-    distance: 0,
+    vialence: 2,
     lines: function(l, g){return this.a + l * this.length + g * this.gap;}
 };
+
+var bullet = {
+    x: -1,
+    y: -1,
+    w: 2,
+    l: 5,
+    speed: 4,
+    shot: function(){
+        this.y -= this.speed;
+    },
+    draw: function(){
+        c.fillStyle = "rgb(255, 0, 0)";
+        c.fillRect(this.x, this.y, this.w, this.l);
+    }
+}
 
 // this object draws the car on the canvas road
 var car = {
@@ -42,8 +64,8 @@ var car = {
     y1: 400,
     h: 100,
     move: 2,
-    draw: function(){
-        img.src = "img/sau.gif";
+    draw: function(image){
+        img.src = image;
         c.drawImage(img, this.x1, this.y1);
     },
     keys: []
@@ -57,10 +79,33 @@ var wall = {
     h: 40,
     l: 100,
     draw: function(){
-        c.fillStyle = "rgb(0, 0, 200)";
-        c.fillRect(this.x1, this.y1, this.l, this.h);
+        wallImg.src = "img/wall.jpg";
+        c.drawImage(wallImg, this.x1, this.y1);
     }
 };
+
+var destroyed_wall = {
+    x: 51,
+    y: 600,
+    exp: function(image){
+        funnel.src = image;
+        c.drawImage(funnel, this.x, this.y);
+    }
+};
+
+var game = {
+    level: 0,
+    distance: 0,
+    points: 0,
+    lives: 3,
+    walls: 0
+};
+
+points.innerHTML = game.points;
+level.innerHTML = game.level;
+lives.innerHTML = game.lives;
+walls.innerHTML = game.walls + " x1000";
+
 
 // this function places the wall randomly on the
 // canvas road.
@@ -76,8 +121,6 @@ var pos = function(){
         wall.x1 = 249;
     }
 };
-
-var dist = document.getElementById("distance");
 
 var repeatme = function(){
     
@@ -125,27 +168,21 @@ var repeatme = function(){
     }
     else{
         rl.a += rl.speed - rl.gap - rl.length;
-        rl.distance += 10;
+        game.distance += 10;
     }
     
-    //car.draw();
-    car.draw();
     
     // generate the wall
-    if(rl.distance >= 100 && rl.distance % 100 === 0){
+    if(game.distance >= 100 && game.distance % 100 === 0){
         wall.y1 = -41;
         pos();
     }
     if(wall.y1 < can.height){
-        wall.draw();
         wall.y1 += rl.speed;
+        // wall.draw();
     }
-    
-    // collision with wall
-    if(((wall.y1 + wall.h) >= car.y1) && (wall.y1 <= (car.y1 + car.h))){
-        if(car.x1 > (wall.x1 - car.l) && car.x1 < (wall.x1 + wall.l)){
-            rl.speed = 0;
-        }
+    if(destroyed_wall.y < can.height){
+        destroyed_wall.y += rl.speed;
     }
     
     // character movement in canvas game using keyboard controls
@@ -169,27 +206,75 @@ var repeatme = function(){
             }
         }
     }
-    else if(car.keys[38]){
-        rl.speed += rl.vialence;
+    
+    // character shooting control
+    if(bullet.y > -1){
+        if(bullet.y <= bullet.speed){
+            bullet.y = -1;
+        }
+        else 
+            bullet.shot();
+        bullet.draw();
     }
-    else if(car.keys[40]){
+    // if bullet get into wall
+    if(((wall.y1 + wall.h) >= bullet.y) && bullet.x > wall.x1 && (bullet.x + bullet.w) < (wall.x1 + wall.l)){
+        bullet.x = -1;
+        bullet.x = -1;
+        destroyed_wall.x = wall.x1;
+        destroyed_wall.y = wall.y1;
+        wall.y1 = can.height + 1;
+        destroyed_wall.exp("img/exp.png");
+        game.points += 1000;
+        game.walls++;
+        points.innerHTML = game.points;
+        walls.innerHTML = game.walls + " x1000"
+    }
+    else{
+        wall.draw();
+        destroyed_wall.exp("img/destroyed_wall.gif");
+    }
+    
+    //console.log(car.destroyed);
+    // stats panel populating
+    if(game.distance % 100 === 0)
+        dist.innerHTML = game.distance / 1000 + " km";
+    
+    // collision with wall
+    if(((wall.y1 + wall.h) >= car.y1) && (wall.y1 <= (car.y1 + car.h)) && car.x1 > (wall.x1 - car.l) && car.x1 < (wall.x1 + wall.l)){
         rl.speed = 0;
+        car.draw("img/exp.png");
+        game.lives--;
+        lives.innerHTML = game.lives;
     }
-    
-    
-    //console.log("d: " + rl.distance + " m: " + wall.move + " y1: " + wall.y1);
-    if(rl.distance % 100 === 0)
-        dist.innerHTML = rl.distance / 1000 + " km";
-    window.requestAnimationFrame(repeatme);
+    else{
+        car.draw("img/sau.gif");
+        // This line recursevely calls this function
+        window.requestAnimationFrame(repeatme);
+    }
 };
-
 
 // Add an event listener to the keypress event.
 window.addEventListener("keydown", function(event) {
-    car.keys[event.keyCode] = true;
+    if(event.keyCode === 37 || event.keyCode === 39)
+        car.keys[event.keyCode] = true;
+    else if(event.keyCode === 38){
+        if(rl.speed === 0){
+            rl.speed += rl.vialence;
+        }
+        else if(rl.speed > 0 && bullet.y === -1){
+            bullet.x = (car.x1 + (car.l / 2));
+            bullet.y = car.y1 + 10;
+        }
+    }
+    else if(event.keyCode === 40){
+        if(rl.speed > 0){
+            rl.speed -= rl.vialence;
+        }
+    }
 });
 window.addEventListener("keyup", function(event) {
-    car.keys[event.keyCode] = false;
+    if(event.keyCode === 37 || event.keyCode === 39)
+        car.keys[event.keyCode] = false;
 });
 
 repeatme();
