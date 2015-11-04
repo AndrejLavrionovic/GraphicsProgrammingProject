@@ -13,10 +13,14 @@ var points = document.getElementById("points");
 var level = document.getElementById("level");
 var lives = document.getElementById("lives");
 var walls = document.getElementById("walls");
+var comment = document.getElementById("com");
 
 var img = new Image();
 var wallImg = new Image();
 var funnel = new Image();
+var puddle = new Image();
+
+var over = false;
 
 // Road object
 var rl = {
@@ -74,14 +78,27 @@ var car = {
 // this object builds the wall on the canvas
 // road.
 var wall = {
-    x1: 51,
-    y1: -40,
+    x: 51,
+    y: -40,
     h: 40,
     l: 100,
     draw: function(){
         wallImg.src = "img/wall.jpg";
-        c.drawImage(wallImg, this.x1, this.y1);
-    }
+        c.drawImage(wallImg, this.x, this.y);
+    },
+    level: 0
+};
+
+var puddle = {
+    l: 100,
+    h: 100,
+    x: 0,
+    y: 551,
+    draw: function(){
+        puddle.src = "img/puddle.gif";
+        c.drawImage(puddle, this.x, this.y);
+    },
+    level: 1
 };
 
 var destroyed_wall = {
@@ -97,8 +114,15 @@ var game = {
     level: 0,
     distance: 0,
     points: 0,
-    lives: 3,
-    walls: 0
+    lives: 2,
+    walls: 0,
+    game_over: function(){
+        if(this.lives === 0){
+            c.font = "40px Verdana";
+            c.fillStyle = "brown";
+            c.fillText("Game Over", 80, 300);
+        }
+    }
 };
 
 points.innerHTML = game.points;
@@ -109,16 +133,16 @@ walls.innerHTML = game.walls + " x1000";
 
 // this function places the wall randomly on the
 // canvas road.
-var pos = function(){
+var pos = function(level, obj){
     var num = Math.floor((Math.random() * 3) + 1);
     if(num === 1){
-        wall.x1 = 51;
+        obj.x = 51;
     }
     else if(num === 2){
-        wall.x1 = 150;
+        obj.x = 150;
     }
     else{
-        wall.x1 = 249;
+        obj.x = 249;
     }
 };
 
@@ -174,11 +198,11 @@ var repeatme = function(){
     
     // generate the wall
     if(game.distance >= 100 && game.distance % 100 === 0){
-        wall.y1 = -41;
-        pos();
+        wall.y = -41;
+        pos(game.level, wall);
     }
-    if(wall.y1 < can.height){
-        wall.y1 += rl.speed;
+    if(wall.y < can.height){
+        wall.y += rl.speed;
         // wall.draw();
     }
     if(destroyed_wall.y < can.height){
@@ -217,12 +241,12 @@ var repeatme = function(){
         bullet.draw();
     }
     // if bullet get into wall
-    if(((wall.y1 + wall.h) >= bullet.y) && bullet.x > wall.x1 && (bullet.x + bullet.w) < (wall.x1 + wall.l)){
+    if(((wall.y + wall.h) >= bullet.y) && bullet.x > wall.x && (bullet.x + bullet.w) < (wall.x + wall.l)){
         bullet.x = -1;
         bullet.x = -1;
-        destroyed_wall.x = wall.x1;
-        destroyed_wall.y = wall.y1;
-        wall.y1 = can.height + 1;
+        destroyed_wall.x = wall.x;
+        destroyed_wall.y = wall.y;
+        wall.y = can.height + 1;
         destroyed_wall.exp("img/exp.png");
         game.points += 1000;
         game.walls++;
@@ -240,16 +264,28 @@ var repeatme = function(){
         dist.innerHTML = game.distance / 1000 + " km";
     
     // collision with wall
-    if(((wall.y1 + wall.h) >= car.y1) && (wall.y1 <= (car.y1 + car.h)) && car.x1 > (wall.x1 - car.l) && car.x1 < (wall.x1 + wall.l)){
+    if(((wall.y + wall.h) >= car.y1) && (wall.y <= (car.y1 + car.h)) && car.x1 > (wall.x - car.l) && car.x1 < (wall.x + wall.l)){
         rl.speed = 0;
         car.draw("img/exp.png");
         game.lives--;
         lives.innerHTML = game.lives;
+        over = true;
     }
     else{
         car.draw("img/sau.gif");
-        // This line recursevely calls this function
+    }
+    
+    // This line recursevely calls this function
+    if(!over && game.lives > 0){
         window.requestAnimationFrame(repeatme);
+        comment.innerHTML = "";
+    }
+    else if(over && game.lives > 0){
+        comment.innerHTML = "To continue the game press S";
+    }
+    if(game.lives === 0){
+        game.game_over();
+        comment.innerHTML = "No lives left!</br>To Play again press A";
     }
 };
 
@@ -271,11 +307,24 @@ window.addEventListener("keydown", function(event) {
             rl.speed -= rl.vialence;
         }
     }
+    else if(event.keyCode === 83 && game.lives > 0){
+        car.x = 160;
+        car.y = 400;
+        wall.x = 51;
+        wall.y = -40;
+        over = false;
+        //window.location.href = "index.html";
+        repeatme();
+    }
+    else if(event.keyCode === 65){
+        window.location.href = "index.html";
+    }
+    //console.log(event);
 });
 window.addEventListener("keyup", function(event) {
     if(event.keyCode === 37 || event.keyCode === 39)
         car.keys[event.keyCode] = false;
 });
 
-repeatme();
 
+repeatme();
