@@ -18,7 +18,7 @@ var comment = document.getElementById("com");
 var img = new Image();
 var wallImg = new Image();
 var funnel = new Image();
-var puddle = new Image();
+var pud = new Image();
 
 var over = false;
 
@@ -79,7 +79,7 @@ var car = {
 // road.
 var wall = {
     x: 51,
-    y: -40,
+    y: 600,
     h: 40,
     l: 100,
     draw: function(){
@@ -95,8 +95,8 @@ var puddle = {
     x: 0,
     y: 551,
     draw: function(){
-        puddle.src = "img/puddle.gif";
-        c.drawImage(puddle, this.x, this.y);
+        pud.src = "img/puddle.gif";
+        c.drawImage(pud, this.x, this.y);
     },
     level: 1
 };
@@ -148,9 +148,17 @@ var pos = function(level, obj){
 
 var repeatme = function(){
     
+    //***************************************************************
+    // Clears the canvas every time when repeat()   *****************
+    // function is called   *****************************************
+    //***************************************************************
     c.clearRect(0, 0, can.width, can.height);
     
-    
+    //***************************************************************
+    // road factory code:   *****************************************
+    // Fills the road and edges with different colors   *************
+    // Marks the road edges with lines   ****************************
+    //***************************************************************
     c.beginPath();
     c.fillStyle = "rgb(0, 255, 0)";
     c.fillRect(0, 0, 49, 550);
@@ -186,20 +194,54 @@ var repeatme = function(){
     c.lineTo(rl.x2, rl.l());
     
     c.stroke();
+    //***************************************************************
     
+    
+    //***************************************************************
+    // This code moves the road *************************************
+    //***************************************************************
     if((rl.gap - rl.a) > rl.speed){
         rl.a += rl.speed;
     }
     else{
         rl.a += rl.speed - rl.gap - rl.length;
         game.distance += 10;
+        if(game.distance === 500){
+            game.level = game.level + 1;
+            level.innerHTML = game.level;
+        }
     }
+    //***************************************************************
     
     
-    // generate the wall
-    if(game.distance >= 100 && game.distance % 100 === 0){
-        wall.y = -41;
-        pos(game.level, wall);
+    //***************************************************************
+    // generate the enimies objects  ********************************
+    //***************************************************************
+    if(game.distance >= 50){
+        if(game.level === 0 && game.distance % 100 === 0){
+            wall.y = -41;
+            pos(game.level, wall);
+        }
+        else if(game.level === 1){
+            if(game.distance % 80 === 0){
+                wall.y = -41;
+                pos(game.level, wall);
+            }
+            if(game.distance % 70 === 0){
+                if((Math.floor(Math.random() * 2)) === 1){
+                    pos(game.level, puddle);
+                    puddle.y = -110;
+                }
+            }
+        }
+    }
+//    if(game.distance >= 100 && game.distance % 100 === 0){
+//        wall.y = -41;
+//        pos(game.level, wall);
+//    }
+    if(puddle.y < can.height){
+        puddle.y += rl.speed;
+        puddle.draw();
     }
     if(wall.y < can.height){
         wall.y += rl.speed;
@@ -209,7 +251,10 @@ var repeatme = function(){
         destroyed_wall.y += rl.speed;
     }
     
-    // character movement in canvas game using keyboard controls
+    
+    //***************************************************************
+    // character movement in canvas game using keyboard controls   **
+    //***************************************************************
     if(car.keys[39]){
         if((car.x1 + car.l) < rl.x2){
             if((car.x1 + car.l) >= (rl.x2 - car.move)){
@@ -230,20 +275,33 @@ var repeatme = function(){
             }
         }
     }
+    //***************************************************************
     
-    // character shooting control
+    
+    
+    
+    //***************************************************************
+    // character shooting control   *********************************
+    //***************************************************************
     if(bullet.y > -1){
         if(bullet.y <= bullet.speed){
+            bullet.x = -1;
             bullet.y = -1;
         }
         else 
             bullet.shot();
         bullet.draw();
     }
-    // if bullet get into wall
+    //***************************************************************
+    
+    
+    
+    //***************************************************************
+    // if bullet get into wall   ************************************
+    //***************************************************************
     if(((wall.y + wall.h) >= bullet.y) && bullet.x > wall.x && (bullet.x + bullet.w) < (wall.x + wall.l)){
         bullet.x = -1;
-        bullet.x = -1;
+        bullet.y = -1;
         destroyed_wall.x = wall.x;
         destroyed_wall.y = wall.y;
         wall.y = can.height + 1;
@@ -257,13 +315,31 @@ var repeatme = function(){
         wall.draw();
         destroyed_wall.exp("img/destroyed_wall.gif");
     }
+    //***************************************************************
     
-    //console.log(car.destroyed);
-    // stats panel populating
+    
+    
+    
+    //***************************************************************
+    // stats panel populating   *************************************
+    //***************************************************************
     if(game.distance % 100 === 0)
         dist.innerHTML = game.distance / 1000 + " km";
+    if(wall.y === car.y + car.h + rl.speed){
+        game.points += 100;
+        points.innerHTML = game.points;
+    }
+    if(puddle.y === car.y + car.h + rl.speed){
+        game.points += 200;
+        points.innerHTML = game.points;
+    }
+    //***************************************************************
     
-    // collision with wall
+    
+    
+    //***************************************************************
+    // collisions   *************************************************
+    //***************************************************************
     if(((wall.y + wall.h) >= car.y1) && (wall.y <= (car.y1 + car.h)) && car.x1 > (wall.x - car.l) && car.x1 < (wall.x + wall.l)){
         rl.speed = 0;
         car.draw("img/exp.png");
@@ -274,8 +350,22 @@ var repeatme = function(){
     else{
         car.draw("img/sau.gif");
     }
+    if(((puddle.y + (puddle.h - 30)) >= car.y1) && 
+       (puddle.y <= (car.y1 + car.h - 30)) &&
+       car.x1 > (puddle.x - car.l + 20) &&
+       car.x1 < (puddle.x + puddle.l - 20)){
+        rl.speed = 0;
+        game.lives--;
+        lives.innerHTML = game.lives;
+        over = true;
+    }
+    //***************************************************************
     
-    // This line recursevely calls this function
+    
+    
+    //***************************************************************
+    // This line recursevely calls this function   ******************
+    //***************************************************************
     if(!over && game.lives > 0){
         window.requestAnimationFrame(repeatme);
         comment.innerHTML = "";
@@ -287,6 +377,7 @@ var repeatme = function(){
         game.game_over();
         comment.innerHTML = "No lives left!</br>To Play again press A";
     }
+    //***************************************************************
 };
 
 // Add an event listener to the keypress event.
@@ -308,10 +399,12 @@ window.addEventListener("keydown", function(event) {
         }
     }
     else if(event.keyCode === 83 && game.lives > 0){
-        car.x = 160;
-        car.y = 400;
+        car.x1 = 160;
+        car.y1 = 400;
         wall.x = 51;
-        wall.y = -40;
+        wall.y = 600;
+        puddle.x = 51;
+        puddle.y = 600;
         over = false;
         //window.location.href = "index.html";
         repeatme();
