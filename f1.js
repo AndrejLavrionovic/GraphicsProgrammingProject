@@ -101,8 +101,20 @@ var puddle = {
     level: 0
 };
 
-var p = [];
-p[0] = new puddle();
+var puddleConst = function(){
+    this.l = 100;
+    this.h = 100;
+    this.x = 0;
+    this.y = 551;
+    this.draw = function(){
+        pud.src = "img/puddle.gif";
+        c.drawImage(pud, this.x, this.y);
+    };
+}
+
+var puddleObj = [];
+puddleObj[0] = new puddleConst();
+puddleObj[1] = new puddleConst();
 
 
 var destroyed_wall = {
@@ -115,7 +127,7 @@ var destroyed_wall = {
 };
 
 var game = {
-    level: 0,
+    level: 2,
     distance: 0,
     points: 0,
     lives: 2,
@@ -149,6 +161,34 @@ var pos = function(level, obj){
         obj.x = 249;
     }
 };
+
+var twoObjPos = function(obj1, obj2){
+    var num = Math.floor((Math.random() * 3) + 1);
+    if(num === 1){
+        obj1.x = 51;
+        obj2.x = 249;
+    }
+    else if(num === 2){
+        obj1.x = 150;
+        obj2.x = 249;
+    }
+    else{
+        obj1.x = 51;
+        obj2.x = 150;
+    }
+}
+
+var collisionFunction = function(obj){
+    if(((obj.y + (obj.h - 30)) >= car.y1) && 
+       (obj.y <= (car.y1 + car.h - 30)) &&
+       car.x1 > (obj.x - car.l + 20) &&
+       car.x1 < (obj.x + obj.l - 20)){
+        rl.speed = 0;
+        game.lives--;
+        lives.innerHTML = game.lives;
+        over = true;
+    }
+}
 
 var repeatme = function(){
     
@@ -237,7 +277,9 @@ var repeatme = function(){
             }
         }
         if(game.level >= 2 && game.distance % 80 === 0){
-            
+            puddleObj[0].y = -101;
+            puddleObj[1].y = -101;
+            twoObjPos(puddleObj[0], puddleObj[1]);
         }
     }
 //    if(game.distance >= 100 && game.distance % 100 === 0){
@@ -255,6 +297,14 @@ var repeatme = function(){
     if(destroyed_wall.y < can.height){
         destroyed_wall.y += rl.speed;
     }
+    if(puddleObj[0].y < can.height){
+        puddleObj[0].y += rl.speed;
+        puddleObj[1].y += rl.speed;
+        puddleObj[0].draw();
+        puddleObj[1].draw();
+    }
+    //***************************************************************
+    
     
     
     //***************************************************************
@@ -338,6 +388,10 @@ var repeatme = function(){
         game.points += 200;
         points.innerHTML = game.points;
     }
+    if(puddleObj[0].y === car.y1 + car.h + 1){
+        game.points += 400;
+        points.innerHTML = game.points;
+    }
     //***************************************************************
     
     
@@ -364,6 +418,8 @@ var repeatme = function(){
         lives.innerHTML = game.lives;
         over = true;
     }
+    collisionFunction(puddleObj[0]);
+    collisionFunction(puddleObj[1]);
     //***************************************************************
     
     
@@ -414,6 +470,10 @@ window.addEventListener("keydown", function(event) {
         wall.y = 600;
         puddle.x = 51;
         puddle.y = 600;
+        puddleObj[0].x = 51;
+        puddleObj[0].y = 600;
+        puddleObj[1].x = 51;
+        puddleObj[1].y = 600;
         over = false;
         //window.location.href = "index.html";
         repeatme();
