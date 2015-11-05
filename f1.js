@@ -86,7 +86,7 @@ var wall = {
         wallImg.src = "img/wall.jpg";
         c.drawImage(wallImg, this.x, this.y);
     },
-    level: 0
+    level: 1
 };
 
 var puddle = {
@@ -98,8 +98,12 @@ var puddle = {
         pud.src = "img/puddle.gif";
         c.drawImage(pud, this.x, this.y);
     },
-    level: 1
+    level: 0
 };
+
+var p = [];
+p[0] = new puddle();
+
 
 var destroyed_wall = {
     x: 51,
@@ -210,6 +214,10 @@ var repeatme = function(){
             game.level = game.level + 1;
             level.innerHTML = game.level;
         }
+        else if(game.distance === 1000){
+            game.level ++;
+            level.innerHTML = game.level;
+        }
     }
     //***************************************************************
     
@@ -217,22 +225,19 @@ var repeatme = function(){
     //***************************************************************
     // generate the enimies objects  ********************************
     //***************************************************************
-    if(game.distance >= 50){
-        if(game.level === 0 && game.distance % 100 === 0){
-            wall.y = -41;
-            pos(game.level, wall);
+    if(game.distance >= 40){
+        if(game.level >= 0 && game.level < 2 && game.distance % 80 === 0){
+            puddle.y = -101;
+            pos(game.level, puddle);
         }
-        else if(game.level === 1){
-            if(game.distance % 80 === 0){
+        if(game.level >= 1){
+            if((game.distance - 200) % 80 === 0){
                 wall.y = -41;
                 pos(game.level, wall);
             }
-            if(game.distance % 70 === 0){
-                if((Math.floor(Math.random() * 2)) === 1){
-                    pos(game.level, puddle);
-                    puddle.y = -110;
-                }
-            }
+        }
+        if(game.level >= 2 && game.distance % 80 === 0){
+            
         }
     }
 //    if(game.distance >= 100 && game.distance % 100 === 0){
@@ -325,11 +330,11 @@ var repeatme = function(){
     //***************************************************************
     if(game.distance % 100 === 0)
         dist.innerHTML = game.distance / 1000 + " km";
-    if(wall.y === car.y + car.h + rl.speed){
+    if(wall.y === car.y1 + car.h + 1){
         game.points += 100;
         points.innerHTML = game.points;
     }
-    if(puddle.y === car.y + car.h + rl.speed){
+    if(puddle.y === car.y1 + car.h + 1){
         game.points += 200;
         points.innerHTML = game.points;
     }
@@ -368,7 +373,11 @@ var repeatme = function(){
     //***************************************************************
     if(!over && game.lives > 0){
         window.requestAnimationFrame(repeatme);
-        comment.innerHTML = "";
+        if(game.distance >= 500 && game.distance < 550)
+            comment.innerHTML = "LEVEL " + game.level;
+        else{
+            comment.innerHTML = "";
+        }
     }
     else if(over && game.lives > 0){
         comment.innerHTML = "To continue the game press S";
