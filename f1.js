@@ -14,11 +14,13 @@ var level = document.getElementById("level");
 var lives = document.getElementById("lives");
 var walls = document.getElementById("walls");
 var comment = document.getElementById("com");
+var soldiers = document.getElementById("soldiers");
 
 var img = new Image();
 var wallImg = new Image();
 var funnel = new Image();
 var pud = new Image();
+var soldierImg = new Image();
 
 var over = false;
 
@@ -59,7 +61,27 @@ var bullet = {
         c.fillStyle = "rgb(255, 0, 0)";
         c.fillRect(this.x, this.y, this.w, this.l);
     }
+};
+
+var soldierBulletConstr = function(){
+    this.x = -1;
+    this.y = -1;
+    this.w = 2;
+    this.l = 3;
+    this.speed = 4;
+    this.shot = function(){
+        this.y += this.speed;
+    };
+    this.draw = function(){
+        c.fillStyle = "rgb(0, 0, 0)";
+        c.fillRect(this.x, this.y, this.w, this.l);
+    };
+    this.vialence = {x: 0, y: 0};
 }
+
+var soldierBulletObj = [];
+soldierBulletObj[0] = new soldierBulletConstr();
+
 
 // this object draws the car on the canvas road
 var car = {
@@ -116,6 +138,19 @@ var puddleObj = [];
 puddleObj[0] = new puddleConst();
 puddleObj[1] = new puddleConst();
 
+var soldierConstr = function(){
+    this.l = 40;
+    this.h = 35;
+    this.x = 0;
+    this.y = 551;
+    this.draw = function(){
+        soldierImg.src = "img/soldier.png";
+        c.drawImage(soldierImg, this.x, this.y);
+    }
+}
+
+var soldierObj = [];
+soldierObj[0] = new soldierConstr();
 
 var destroyed_wall = {
     x: 51,
@@ -127,17 +162,23 @@ var destroyed_wall = {
 };
 
 var game = {
-    level: 2,
+    level: 0,
     distance: 0,
     points: 0,
-    lives: 2,
+    lives: 3,
     walls: 0,
+    soldiers: 0,
     game_over: function(){
         if(this.lives === 0){
             c.font = "40px Verdana";
             c.fillStyle = "brown";
             c.fillText("Game Over", 80, 300);
         }
+    },
+    game_win: function(){
+        c.font = "40px Verdana";
+        c.fillStyle = "red";
+        c.fillText("!!!You WIN!!!", 70, 300);
     }
 };
 
@@ -145,6 +186,7 @@ points.innerHTML = game.points;
 level.innerHTML = game.level;
 lives.innerHTML = game.lives;
 walls.innerHTML = game.walls + " x1000";
+soldiers.innerHTML = game.soldiers + " x2000";
 
 
 // this function places the wall randomly on the
@@ -178,11 +220,27 @@ var twoObjPos = function(obj1, obj2){
     }
 }
 
+var soldierPos = function(obj){
+    var num = Math.floor((Math.random() * 258) + 72);
+    obj.x = num;
+}
+
 var collisionFunction = function(obj){
     if(((obj.y + (obj.h - 30)) >= car.y1) && 
        (obj.y <= (car.y1 + car.h - 30)) &&
        car.x1 > (obj.x - car.l + 20) &&
        car.x1 < (obj.x + obj.l - 20)){
+        rl.speed = 0;
+        game.lives--;
+        lives.innerHTML = game.lives;
+        over = true;
+    }
+}
+var soldierCollFunc = function(obj){
+    if(((obj.y + (obj.h)) >= car.y1) && 
+       (obj.y <= (car.y1 + car.h)) &&
+       car.x1 > (obj.x - car.l) &&
+       car.x1 < (obj.x + obj.l)){
         rl.speed = 0;
         game.lives--;
         lives.innerHTML = game.lives;
@@ -255,7 +313,11 @@ var repeatme = function(){
             level.innerHTML = game.level;
         }
         else if(game.distance === 1000){
-            game.level ++;
+            game.level++;
+            level.innerHTML = game.level;
+        }
+        else if(game.distance === 2000){
+            game.level++;
             level.innerHTML = game.level;
         }
     }
@@ -270,7 +332,7 @@ var repeatme = function(){
             puddle.y = -101;
             pos(game.level, puddle);
         }
-        if(game.level >= 1){
+        if(game.level >= 1 && game.level < 3){
             if((game.distance - 200) % 80 === 0){
                 wall.y = -41;
                 pos(game.level, wall);
@@ -280,6 +342,12 @@ var repeatme = function(){
             puddleObj[0].y = -101;
             puddleObj[1].y = -101;
             twoObjPos(puddleObj[0], puddleObj[1]);
+        }
+        if(game.level >= 3){
+            if((game.distance - 200) % 80 === 0){
+                soldierObj[0].y = -36;
+                soldierPos(soldierObj[0]);
+            }
         }
     }
 //    if(game.distance >= 100 && game.distance % 100 === 0){
@@ -302,6 +370,14 @@ var repeatme = function(){
         puddleObj[1].y += rl.speed;
         puddleObj[0].draw();
         puddleObj[1].draw();
+    }
+    if(soldierObj[0].y < can.height){
+        soldierObj[0].y += rl.speed;
+        soldierObj[0].draw();
+        if(soldierObj[0].y === 6 && soldierBulletObj[0].y === -1){
+            soldierBulletObj[0].x = (soldierObj[0].x + (soldierObj[0].l / 2));
+            soldierBulletObj[0].y = soldierObj[0].y + soldierObj[0].h;
+        }
     }
     //***************************************************************
     
@@ -347,6 +423,16 @@ var repeatme = function(){
             bullet.shot();
         bullet.draw();
     }
+    if(soldierBulletObj[0].y > -1){
+        if(soldierBulletObj[0].y >= can.height - soldierBulletObj[0].speed){
+            soldierBulletObj[0].x = -1;
+            soldierBulletObj[0].y = -1;
+        }
+        else{
+            soldierBulletObj[0].shot();
+        }
+        soldierBulletObj[0].draw();
+    }
     //***************************************************************
     
     
@@ -370,6 +456,28 @@ var repeatme = function(){
         wall.draw();
         destroyed_wall.exp("img/destroyed_wall.gif");
     }
+    if(soldierBulletObj[0].x > car.x1 &&
+       soldierBulletObj[0].x - 1 < (car.x1 + car.l) &&
+       soldierBulletObj[0].y - 2 > car.y1 &&
+       soldierBulletObj[0].y < (car.y1 + car.h)
+      ){
+        soldierBulletObj[0].x = -1;
+        soldierBulletObj[0].y = -1;
+        rl.speed = 0;
+        car.draw("img/exp.png");
+        game.lives--;
+        lives.innerHTML = game.lives;
+        over = true;
+    }
+    if(((soldierObj[0].y + soldierObj[0].h) >= bullet.y) && bullet.x > soldierObj[0].x && (bullet.x + bullet.w) < (soldierObj[0].x + soldierObj[0].l)){
+        bullet.x = -1;
+        bullet.y = -1;
+        soldierObj[0].y = can.height + 1;
+        game.points += 2000;
+        game.soldiers++;
+        points.innerHTML = game.points;
+        walls.innerHTML = game.soldiers + " x2000"
+    }
     //***************************************************************
     
     
@@ -390,6 +498,10 @@ var repeatme = function(){
     }
     if(puddleObj[0].y === car.y1 + car.h + 1){
         game.points += 400;
+        points.innerHTML = game.points;
+    }
+    if(soldierObj[0].y === car.y + car.h + 2){
+        game.points += 800;
         points.innerHTML = game.points;
     }
     //***************************************************************
@@ -420,6 +532,7 @@ var repeatme = function(){
     }
     collisionFunction(puddleObj[0]);
     collisionFunction(puddleObj[1]);
+    soldierCollFunc(soldierObj[0]);
     //***************************************************************
     
     
@@ -429,18 +542,30 @@ var repeatme = function(){
     //***************************************************************
     if(!over && game.lives > 0){
         window.requestAnimationFrame(repeatme);
-        if(game.distance >= 500 && game.distance < 550)
+        if(game.distance >= 500 && game.distance < 550){
             comment.innerHTML = "LEVEL " + game.level;
+        }
+        else if(game.distance >= 1000 && game.distance < 1050){
+            comment.innerHTML = "LEVEL " + game.level;
+        }
+        else if(game.distance >= 2000 && game.distance < 2050){
+            comment.innerHTML = "LEVEL " + game.level;
+        }
         else{
             comment.innerHTML = "";
         }
     }
-    else if(over && game.lives > 0){
+    else if(over && game.lives > 0 && game.distance < 3500){
         comment.innerHTML = "To continue the game press S";
     }
     if(game.lives === 0){
         game.game_over();
         comment.innerHTML = "No lives left!</br>To Play again press A";
+    }
+    if(game.distance === 3500){
+        over = true;
+        game.game_win();
+        comment.innerHTML = "CONGRADULATION!!!</br>Mission is complete and</br> the way is clear for our army!!!</br></br>If You want to play again - press A";
     }
     //***************************************************************
 };
@@ -474,8 +599,9 @@ window.addEventListener("keydown", function(event) {
         puddleObj[0].y = 600;
         puddleObj[1].x = 51;
         puddleObj[1].y = 600;
+        soldierObj[0].x = 51;
+        soldierObj[0].y = 600;
         over = false;
-        //window.location.href = "index.html";
         repeatme();
     }
     else if(event.keyCode === 65){
