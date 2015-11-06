@@ -48,6 +48,7 @@ var rl = {
     lines: function(l, g){return this.a + l * this.length + g * this.gap;}
 };
 
+// tank bullet object
 var bullet = {
     x: -1,
     y: -1,
@@ -63,6 +64,7 @@ var bullet = {
     }
 };
 
+// soldier bullet construction
 var soldierBulletConstr = function(){
     this.x = -1;
     this.y = -1;
@@ -79,8 +81,8 @@ var soldierBulletConstr = function(){
     this.vialence = {x: 0, y: 0};
 }
 
-var soldierBulletObj = [];
-soldierBulletObj[0] = new soldierBulletConstr();
+var soldierBulletObj = []; // array
+soldierBulletObj[0] = new soldierBulletConstr(); // instance of soldier bullet
 
 
 // this object draws the car on the canvas road
@@ -111,6 +113,7 @@ var wall = {
     level: 1
 };
 
+// puddle object
 var puddle = {
     l: 100,
     h: 100,
@@ -123,6 +126,7 @@ var puddle = {
     level: 0
 };
 
+// another puddle construction
 var puddleConst = function(){
     this.l = 100;
     this.h = 100;
@@ -134,10 +138,11 @@ var puddleConst = function(){
     };
 }
 
-var puddleObj = [];
+var puddleObj = []; // array of puddle objects
 puddleObj[0] = new puddleConst();
 puddleObj[1] = new puddleConst();
 
+// soldier construction
 var soldierConstr = function(){
     this.l = 40;
     this.h = 35;
@@ -149,7 +154,7 @@ var soldierConstr = function(){
     }
 }
 
-var soldierObj = [];
+var soldierObj = []; // array of soldier objects
 soldierObj[0] = new soldierConstr();
 
 var destroyed_wall = {
@@ -161,6 +166,8 @@ var destroyed_wall = {
     }
 };
 
+// game objects contains stats
+// and game over and game win textprints
 var game = {
     level: 0,
     distance: 0,
@@ -182,6 +189,7 @@ var game = {
     }
 };
 
+// stats printing
 points.innerHTML = game.points;
 level.innerHTML = game.level;
 lives.innerHTML = game.lives;
@@ -204,6 +212,8 @@ var pos = function(level, obj){
     }
 };
 
+// if there are two puddles
+// they place with no overlapping
 var twoObjPos = function(obj1, obj2){
     var num = Math.floor((Math.random() * 3) + 1);
     if(num === 1){
@@ -220,11 +230,13 @@ var twoObjPos = function(obj1, obj2){
     }
 }
 
+// randomly soldier positioning
 var soldierPos = function(obj){
-    var num = Math.floor((Math.random() * 258) + 72);
+    var num = Math.floor((Math.random() * 238) + 72);
     obj.x = num;
 }
 
+// tank - puddle collision
 var collisionFunction = function(obj){
     if(((obj.y + (obj.h - 30)) >= car.y1) && 
        (obj.y <= (car.y1 + car.h - 30)) &&
@@ -236,6 +248,8 @@ var collisionFunction = function(obj){
         over = true;
     }
 }
+
+// tank soldier collision
 var soldierCollFunc = function(obj){
     if(((obj.y + (obj.h)) >= car.y1) && 
        (obj.y <= (car.y1 + car.h)) &&
@@ -248,6 +262,7 @@ var soldierCollFunc = function(obj){
     }
 }
 
+// Game - recursevely called function
 var repeatme = function(){
     
     //***************************************************************
