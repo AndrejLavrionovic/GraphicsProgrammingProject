@@ -17,6 +17,7 @@ On the last level enemy soldiers try to destroy the tank by shooting it. Your ta
 
 ######Game control.
 Game controls by keyboard buttons.
+
 1. **Up-arrow button** - starts the movement forward if the game begins or if it continue after losing the live. While tank is going *Up-arrow button* used for shooting.
 2. **Down-arrow button** - stops the tank if it is moving.
 3. **Left-arrow and Right-arrow buttons** - are move the tank left and right.
@@ -26,6 +27,7 @@ Game controls by keyboard buttons.
 ######Game rules.
 **Lives** - The player is given 3 lives in the beginning. Every time when the player’s tank is killed the he uses another live to continue the game. If no lives left - the Game is over.
 **Scores** - During the game player’s tank must avoid or destroy the enemy or enemies obstacles. Every time if player successfully avoid the enemy's object he got the scores. If the obstacles are destroyable such as soldiers or walls, and tank kill them with accurate shoot the scores are much higher than if just avoid them.
+
 | Description | Score |
 |------------------|-----------|
 | Wall avoided| 200 |
@@ -36,6 +38,7 @@ Game controls by keyboard buttons.
 | Soldier destroyed | 2000 |
 
 **Levels** - The game starts from *Level 0* and goes up to *Level 3*
+
 | Level | Done | Features |
 |----------|----------|--------------|
 | 0 | Up to 500 m. | Puddles that you need to avoid |
