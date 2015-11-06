@@ -476,7 +476,7 @@ var repeatme = function(){
         game.points += 2000;
         game.soldiers++;
         points.innerHTML = game.points;
-        walls.innerHTML = game.soldiers + " x2000"
+        soldiers.innerHTML = game.soldiers + " x2000"
     }
     //***************************************************************
     
